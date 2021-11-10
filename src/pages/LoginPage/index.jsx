@@ -29,7 +29,7 @@ const Login = (props) => {
       {props.logginIn && <Spinner />}
       {props.firebaseError && (
         <div style={{ color: "red" }}>
-          {props.firebaseError ? "Email эсвэл нууц үг буруу байна." : null}
+          {props.firebaseError ? "Email эсвэл нууц үг буруу байна!" : null}
         </div>
       )}
       <Button text="Нэвтрэх" btnType="Success" daragdsan={login} />
