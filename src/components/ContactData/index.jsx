@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
-import { connect } from "react-redux";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import Button from "../General/Button";
 import css from "./style.module.css";
 import Spinner from "../General/Spinner";
-import { withRouter } from "react-router";
-import * as actions from "../../redux/actions/orderActions";
+import { useHistory } from "react-router";
+import BurgerContext from "../../context/BurgerContext";
+import UserContext from "../../context/UserContext";
 
 const ContactData = (props) => {
+  const userCtx = useContext(UserContext);
+  const history = useHistory();
+  const ctx = useContext(BurgerContext);
   const [name, setName] = useState();
   const [city, setCity] = useState();
   const [street, setStreet] = useState();
@@ -14,17 +17,16 @@ const ContactData = (props) => {
   const dunRef = useRef();
 
   useEffect(() => {
-    console.log("contact data effect... ");
-    if (props.newOrderStatus.finished && !props.newOrderStatus.error) {
-      props.history.replace("/orders");
+    if (ctx.burger.finished && !ctx.burger.error) {
+      history.replace("/orders");
     }
 
     return () => {
       // Tseverlegch function : Zahialgiig butsaagaad hoosolno. Daraachiin zahialgad beltgene gesen ug.
-      console.log("Order clearing...");
-      props.clearOrder();
+      ctx.clearBurger();
     };
-  }, [props.newOrderStatus.finished]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctx.burger.finished]);
 
   const changeName = (e) => {
     if (dunRef.current.style.color === "red")
@@ -41,9 +43,9 @@ const ContactData = (props) => {
 
   const saveOrder = () => {
     const newOrder = {
-      userId: props.userId,
-      orts: props.ingredients,
-      dun: props.price,
+      userId: userCtx.state.userId,
+      orts: ctx.burger.ingredients,
+      dun: ctx.burger.totalPrice,
       hayag: {
         name: name,
         city: city,
@@ -51,21 +53,23 @@ const ContactData = (props) => {
       },
     };
 
-    props.saveOrderAction(newOrder);
+    ctx.saveBurger(newOrder, userCtx.state.token);
 
     // this.setState({ loading: true });
   };
-
+  console.log("Contact Data rendered......");
   return (
     <div className={css.ContactData}>
       <div ref={dunRef}>
-        <strong style={{ fontSize: "16px" }}>Дүн: {props.price}</strong>{" "}
+        <strong style={{ fontSize: "16px" }}>
+          Дүн: {ctx.burger.totalPrice}
+        </strong>{" "}
       </div>
       <div>
-        {props.newOrderStatus.error &&
-          `Захиалгыг хадгалахад алдаа гарлаа : ${props.newOrderStatus.error}`}
+        {ctx.burger.error &&
+          `Захиалгыг хадгалахад алдаа гарлаа : ${ctx.burger.error}`}
       </div>
-      {props.newOrderStatus.saving ? (
+      {ctx.burger.saving ? (
         <Spinner />
       ) : (
         <div>
@@ -93,27 +97,9 @@ const ContactData = (props) => {
           <Button text="ИЛГЭЭХ" btnType="Success" daragdsan={saveOrder} />
         </div>
       )}
+      <Button text="Toggle" btnType="Success" daragdsan={ctx.toggle} />
     </div>
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    ingredients: state.burgerReducer.ingredients,
-    price: state.burgerReducer.totalPrice,
-    newOrderStatus: state.orderReducer.newOrder,
-    userId: state.signupReducer.userId,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    saveOrderAction: (newOrder) => dispatch(actions.saveOrder(newOrder)),
-    clearOrder: () => dispatch(actions.clearOrder()),
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withRouter(ContactData));
+export default ContactData;

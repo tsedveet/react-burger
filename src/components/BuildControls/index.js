@@ -1,34 +1,34 @@
-import React from "react";
-import { connect } from "react-redux";
-
+import React, { useContext } from "react";
+import BurgerContext from "../../context/BurgerContext";
 import BuildControl from "../BuildControl";
 import css from "./style.module.css";
 
 const BuildControls = (props) => {
-  const disabledIngredients = { ...props.burgeriinOrts };
+  const burgerContext = useContext(BurgerContext);
+  const disabledIngredients = { ...burgerContext.burger.ingredients };
 
-    for (let key in disabledIngredients) {
-      disabledIngredients[key] = disabledIngredients[key] <= 0;
-    }
+  for (let key in disabledIngredients) {
+    disabledIngredients[key] = disabledIngredients[key] <= 0;
+  }
   return (
     <div className={css.BuildControls}>
       <p>
-        Бургерийн үнэ : <strong>{props.niitUne}</strong>
+        Бургерийн үнэ : <strong>{burgerContext.burger.totalPrice}</strong>
       </p>
 
-      {Object.keys(props.ingredientNames).map((el) => (
+      {Object.keys(burgerContext.burger.ingredientNames).map((el) => (
         <BuildControl
           key={el}
           disabled={disabledIngredients}
           type={el}
-          orts={props.ingredientNames[el]}
+          orts={burgerContext.burger.ingredientNames[el]}
           ingredientsPrices={props.ingredientsPrices}
         />
       ))}
       <div className="inline-flex rounded-md shadow mt-4">
         <button
           onClick={props.showConfirmModal}
-          disabled={!props.purchasing}
+          disabled={!burgerContext.burger.purchasing}
           className={css.OrderButton}
         >
           <span>ЗАХИАЛАХ</span>
@@ -37,14 +37,5 @@ const BuildControls = (props) => {
     </div>
   );
 };
-const mapStateToProps = (state) => {
-  return {
-    burgeriinOrts: state.burgerReducer.ingredients,
-    niitUne: state.burgerReducer.totalPrice,
-    purchasing: state.burgerReducer.purchasing,
-    ingredientNames: state.burgerReducer.ingredientNames,
-  };
-};
 
-
-export default connect(mapStateToProps)(BuildControls);
+export default BuildControls;
